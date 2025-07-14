@@ -1,1 +1,0 @@
-# Prueba-tecnica-frontend-Mindata

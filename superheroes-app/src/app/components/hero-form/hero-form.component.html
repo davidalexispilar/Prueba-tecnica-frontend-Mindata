@@ -1,0 +1,28 @@
+<form (ngSubmit)="onSubmit()" class="form">
+  <div>
+    <mat-form-field>
+      <input matInput placeholder="Nombre" [value]="nombre()" (input)="onNombreInput($event)" appUppercase >
+      @if (nombreError()) {
+        <mat-error>{{ nombreError() }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field>
+      <input matInput placeholder="Poder" [value]="poder()" (input)="onPoderInput($event)" >
+      @if (poderError()) {
+        <mat-error>{{ poderError() }}</mat-error>
+      }
+    </mat-form-field>
+  </div>
+  <div>
+    <mat-form-field>
+      <textarea matInput placeholder="Descripción" [value]="descripcion()"
+      (input)="onDescripcionInput($event)"></textarea>
+    </mat-form-field>
+  </div>
+    <button mat-raised-button color="primary" type="submit" [disabled]="formInvalid()">
+      @if (editMode()) {Guardar cambios} @else {Crear héroe}
+  </button>
+  <button mat-button type="button" (click)="cancelar()">Cancelar</button>
+</form>
