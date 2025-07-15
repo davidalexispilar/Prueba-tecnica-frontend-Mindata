@@ -63,6 +63,7 @@ export class HeroFormComponent {
 
   onSubmit() {
     if (this.formInvalid()) return;
+    this.loadingService.show()
     const hero: SuperHeroe = {
       id: this.heroId ?? 0,
       nombre: this.nombre(),
@@ -70,30 +71,27 @@ export class HeroFormComponent {
       descripcion: this.descripcion()
     };
     if (this.editMode()) {
-      this.loadingService.show()
       this.heroesService.actualizarHeroe(hero);
-      setTimeout
-        (() => {
-          this.loadingService.hide();
-          this.router.navigate(['/heroes']);
-        }, 2000);
     } else {
-      this.loadingService.show()
       this.heroesService.agregarHeroe({
         nombre: this.nombre(),
         poder: this.poder(),
         descripcion: this.descripcion()
       })
-      setTimeout
-        (() => {
-          this.loadingService.hide();
-          this.router.navigate(['/heroes']);
-        }, 2000);
+
     }
+    setTimeout
+      (() => {
+        this.loadingService.hide();
+        this.router.navigate(['/heroes']);
+      }, 2000);
   }
 
   cancelar() {
-    this.router.navigate(['/heroes']);
+    this.router.navigate(['/heroes'], {
+      queryParamsHandling: 'preserve'
+    });
+
   }
 
   onNombreInput(event: Event) {

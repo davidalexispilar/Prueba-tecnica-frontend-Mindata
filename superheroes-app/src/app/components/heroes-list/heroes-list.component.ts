@@ -2,8 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { SuperheroesService } from '../../services/superheroes.service';
 import { SuperHeroe } from '../../models/superheroe.model';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../confirm-dialog/confirm-dialog.component';
 import { MatTableModule } from '@angular/material/table';
@@ -14,7 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { CdkTableModule } from '@angular/cdk/table';
 
-import { signal, computed, effect } from '@angular/core';
+import { signal, computed } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { LoadingService } from '../../services/loading.service';
 
@@ -42,7 +41,7 @@ export class HeroesListComponent implements OnInit {
   pageSize = signal(5);
 
   filteredHeroes = computed(() =>
-    this.heroesService.getHeroes() // obtener el array
+    this.heroesService.getHeroes()
       .filter((hero: SuperHeroe) =>
         hero.nombre.toLowerCase().includes(this.filter().toLowerCase())
       )
@@ -53,6 +52,7 @@ export class HeroesListComponent implements OnInit {
     return this.filteredHeroes().slice(start, start + this.pageSize());
   });
 
+
   totalFiltered = computed(() => this.filteredHeroes().length);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -61,17 +61,29 @@ export class HeroesListComponent implements OnInit {
     private heroesService: SuperheroesService,
     private router: Router,
     private dialog: MatDialog,
-    private loadingService: LoadingService
-  ) { }
+    private loadingService: LoadingService,
+    private route: ActivatedRoute
+  ) {
+    this.route.queryParamMap.subscribe(params => {
+      const filtroURL = params.get('filtro') || '';
+      this.filter.set(filtroURL);
+    });
+  }
 
   ngOnInit(): void {
-    // Enlazar el signal directamente
-    // Eliminar la declaración local de heroes y usar directamente this.heroesService.getHeroes en los computed y en la plantilla.
+
+  }
+  updateFilter(filterValue: string) {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { filtro: filterValue },
+      queryParamsHandling: 'merge',
+    });
   }
 
   onFilterInput(value: string) {
     this.filter.set(value);
-    this.pageIndex.set(0); // Resetear a la primera página al filtrar
+    this.pageIndex.set(0);
   }
 
   onInput(event: Event) {
@@ -89,7 +101,9 @@ export class HeroesListComponent implements OnInit {
   }
 
   editHero(id: number) {
-    this.router.navigate(['/heroes/editar', id]);
+    this.router.navigate(['/heroes/editar', id], {
+      queryParamsHandling: 'preserve'
+    });
   }
 
   openDeleteDialog(id: number) {
@@ -104,7 +118,9 @@ export class HeroesListComponent implements OnInit {
           this.loadingService.hide();
           this.heroesService.eliminarHeroe(id);
         }, 2000);
-        // No es necesario recargar, signals actualizan automáticamente
+
+      } else {
+        this.loadingService.hide();
       }
     });
   }

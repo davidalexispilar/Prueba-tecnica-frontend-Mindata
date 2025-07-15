@@ -4,7 +4,7 @@ import { SuperheroesService } from '../../services/superheroes.service';
 import { of } from 'rxjs';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
-import { signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 
 describe('HeroesListComponent', () => {
   let component: HeroesListComponent;
@@ -23,7 +23,8 @@ describe('HeroesListComponent', () => {
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
 
-    heroesServiceSpy.getHeroes.and.returnValue(mockHeroes);
+
+    heroesServiceSpy.getHeroes.and.callFake(() => mockHeroes);
 
     heroesServiceSpy.eliminarHeroe.and.returnValue(undefined);
     dialogSpy.open.and.returnValue({ afterClosed: () => of(true) } as any);
@@ -33,7 +34,8 @@ describe('HeroesListComponent', () => {
       providers: [
         { provide: SuperheroesService, useValue: heroesServiceSpy },
         { provide: Router, useValue: routerSpy },
-        { provide: MatDialog, useValue: dialogSpy }
+        { provide: MatDialog, useValue: dialogSpy },
+        { provide: ActivatedRoute, useValue: { snapshot: {}, queryParamMap: of({ get: () => '' }) } }
       ]
     }).compileComponents();
 
@@ -54,8 +56,26 @@ describe('HeroesListComponent', () => {
 
   it('debería navegar al editar héroe', () => {
     component.editHero(1);
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/heroes/editar', 1]);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/heroes/editar', 1], { queryParamsHandling: 'preserve' });
   });
 
+  it('debería filtrar héroes por nombre', () => {
+    component.onFilterInput('Super');
+    expect(component.filteredHeroes().length).toBeGreaterThan(0);
+  });
+
+  it('debería cambiar la página correctamente', () => {
+    component.onPageChange({ pageIndex: 1, pageSize: 1 });
+    expect(component.pageIndex()).toBe(1);
+    expect(component.pageSize()).toBe(1);
+  });
+
+  it('debería abrir y cerrar el diálogo de eliminación', () => {
+    (dialogSpy.open as jasmine.Spy).and.returnValue({
+      afterClosed: () => of(false)
+    } as any);
+    component.openDeleteDialog(1);
+
+  });
 
 });

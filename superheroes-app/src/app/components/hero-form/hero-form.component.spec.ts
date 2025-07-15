@@ -66,8 +66,23 @@ describe('HeroFormComponent', () => {
 
   });
 
+  it('debería no llamar a actualizar si no está en modo edición', () => {
+    component.editMode.set(false);
+    component.nombre.set('Test');
+    component.poder.set('Poder');
+    component.onSubmit();
+    expect(heroesServiceSpy.actualizarHeroe).not.toHaveBeenCalled();
+  });
+
+  it('debería no guardar si el nombre está vacío', () => {
+    component.nombre.set('');
+    component.poder.set('Poder');
+    component.onSubmit();
+    expect(heroesServiceSpy.agregarHeroe).not.toHaveBeenCalled();
+  });
+
   it('debería navegar al cancelar', () => {
     component.cancelar();
-    expect(routerSpy.navigate).toHaveBeenCalledWith(['/heroes']);
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/heroes'], jasmine.any(Object));
   });
 });

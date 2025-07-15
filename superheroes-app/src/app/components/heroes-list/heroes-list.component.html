@@ -1,6 +1,6 @@
 <div class="filter-container">
   <mat-form-field>
-    <input matInput placeholder="Filtrar por nombre" [value]="filter()" (input)="onInput($event)">
+    <input matInput placeholder="Filtrar por nombre" [value]="filter()"   (input)="updateFilter($any($event.target).value)">
   </mat-form-field>
   <button mat-raised-button color="primary" (click)="addHero()">Añadir héroe</button>
 </div>
